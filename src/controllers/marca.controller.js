@@ -1,9 +1,10 @@
 import express from 'express';
 import db from '../config/connection/db.js';
+import { apenasNumeros } from '../utils/text.js';
 
 const { Request, Response } = express;
 
-const CorController = {
+const MarcaController = {
   /**
    * @param {Request} request 
    * @param {Response} response 
@@ -14,10 +15,10 @@ const CorController = {
     };
 
     try {
-      const cores = await db.cor.findAll();
+      const marcas = await db.marca.findAll();
 
       content.success = true;
-      content.data = cores;
+      content.data = marcas;
     } catch (error) {
       content.error = error;
       content.success = false;
@@ -42,17 +43,24 @@ const CorController = {
         throw 'Dados não enviados!';
       }
 
-      if (!body.nome) {
-        throw 'Nome da cor é de preenchimento obrigatório.';
+      const { descricao, slogan, ano_criacao } = body;
+
+      if (!descricao) {
+        throw 'Nome da marca é de preenchimento obrigatório.';
       }
 
-      const cor = await db.cor.create({
-        NOME: body.nome,
-        HEX: body.hex
+      if (apenasNumeros(ano_criacao) != ano_criacao) {
+        throw 'Permitido apenas o envio de números no campo de ano.';
+      }
+
+      const marca = await db.marca.create({
+        DESCRICAO: descricao,
+        SLOGAN: slogan,
+        ANO_CRIACAO: ano_criacao
       });
 
       content.success = true;
-      content.result = cor;
+      content.result = marca;
     } catch (error) {
       content.success = false;
       content.error = error;
@@ -77,27 +85,35 @@ const CorController = {
         throw 'Dados não enviados!';
       }
 
-      if (!params.id) {
+      const { id } = params;
+      const { descricao, slogan, ano_criacao } = body;
+
+      if (!id) {
         throw 'Não foi possível encontrar o item desejado.';
       }
 
-      if (!body.nome) {
+      if (!descricao) {
         throw 'Nome da cor é de preenchimento obrigatório.';
       }
 
-      const cor = await db.cor.findByPk(params.id);
-
-      if (!cor) {
-        throw `Cor ainda não cadastrada para o código ${params.id}.`;
+      if (apenasNumeros(ano_criacao) != ano_criacao) {
+        throw 'Permitido apenas o envio de números no campo de ano.';
       }
 
-      cor.NOME = body.nome;
-      cor.HEX = body.hex;
+      const marca = await db.marca.findByPk(id);
 
-      await cor.save();
+      if (!marca) {
+        throw `Marca ainda não cadastrada para o código ${id}.`;
+      }
+
+      marca.DESCRICAO = descricao;
+      marca.SLOGAN = slogan;
+      marca.ANO_CRIACAO = ano_criacao;
+
+      await marca.save();
 
       content.success = true;
-      content.result = cor;
+      content.result = marca;
     } catch (error) {
       content.success = false;
       content.error = error;
@@ -122,20 +138,22 @@ const CorController = {
         throw 'Dados não enviados!';
       }
 
-      if (!params.id) {
+      const { id } = params;
+
+      if (!id) {
         throw 'Não foi possível encontrar o item desejado.';
       }
 
-      const cor = await db.cor.findByPk(params.id);
+      const marca = await db.marca.findByPk(id);
 
-      if (!cor) {
-        throw `Cor ainda não cadastrada para o código ${params.id}.`;
+      if (!marca) {
+        throw `Marca ainda não cadastrada para o código ${id}.`;
       }
 
-      await db.cor.destroy({ where: { ID: params.id } });
+      await db.marca.destroy({ where: { ID: id } });
 
       content.success = true;
-      content.result = cor;
+      content.result = marca;
     } catch (error) {
       content.success = false;
       content.error = error;
@@ -160,18 +178,20 @@ const CorController = {
         throw 'Dados não enviados!';
       }
 
-      if (!params.id) {
+      const { id } = params;
+
+      if (!id) {
         throw 'Não foi possível encontrar o item desejado.';
       }
 
-      const cor = await db.cor.findByPk(params.id);
+      const marca = await db.marca.findByPk(id);
 
-      if (!cor) {
-        throw `Cor ainda não cadastrada para o código ${params.id}.`;
+      if (!marca) {
+        throw `Marca ainda não cadastrada para o código ${id}.`;
       }
 
       content.success = true;
-      content.result = cor;
+      content.result = marca;
     } catch (error) {
       content.success = false;
       content.error = error;
@@ -181,4 +201,4 @@ const CorController = {
   }
 };
 
-export default CorController;
+export default MarcaController;

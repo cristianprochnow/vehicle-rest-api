@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import CorRoutes from './routes/cor.route.js';
+import MarcaRoutes from './routes/marca.route.js';
 
 const routes = Router();
 
@@ -10,6 +11,7 @@ routes
       message: 'Hello, World!'
     });
   })
-  .use('/cor', CorRoutes);
+  .use('/cor', CorRoutes)
+  .use('/marca', MarcaRoutes);
 
 export default routes;
