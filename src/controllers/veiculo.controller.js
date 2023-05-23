@@ -15,7 +15,18 @@ const VeiculoController = {
     };
 
     try {
-      const veiculos = await db.veiculo.findAll();
+      const { query } = request;
+      const { placa } = query;
+
+      const where = {};
+
+      if (placa) {
+        where.placa = placa;
+      }
+
+      const veiculos = await db.veiculo.findAll({
+        where
+      });
 
       content.success = true;
       content.data = veiculos;
@@ -45,7 +56,7 @@ const VeiculoController = {
 
       const { placa, renavam, cor_id, modelo_id } = body;
 
-      const validation = this.validate({
+      const validation = validate({
         placa,
         renavam,
         cor_id,
@@ -56,10 +67,10 @@ const VeiculoController = {
         throw validation.error;
       }
 
-      const marca = await db.marca.findByPk(marca_id);
+      const modelo = await db.modelo.findByPk(modelo_id);
 
-      if (!marca) {
-        throw `Marca não cadastrada para o código ${marca_id}.`;
+      if (!modelo) {
+        throw `Modelo não cadastrada para o código ${modelo_id}.`;
       }
 
       const cor = await db.cor.findByPk(cor_id);
@@ -78,6 +89,7 @@ const VeiculoController = {
       content.success = true;
       content.result = veiculo;
     } catch (error) {
+      console.log(error);
       content.success = false;
       content.error = error;
     } finally {
@@ -104,7 +116,7 @@ const VeiculoController = {
       const { id } = params;
       const { placa, renavam, cor_id, modelo_id } = body;
 
-      const validation = this.validate({
+      const validation = validate({
         placa,
         renavam,
         cor_id,
@@ -115,10 +127,10 @@ const VeiculoController = {
         throw validation.error;
       }
 
-      const marca = await db.marca.findByPk(marca_id);
+      const modelo = await db.modelo.findByPk(modelo_id);
 
-      if (!marca) {
-        throw `Marca não cadastrada para o código ${marca_id}.`;
+      if (!modelo) {
+        throw `Modelo não cadastrada para o código ${modelo_id}.`;
       }
 
       const cor = await db.cor.findByPk(cor_id);
@@ -127,7 +139,7 @@ const VeiculoController = {
         throw `Cor não cadastrada para o código ${cor_id}.`;
       }
 
-      const veiculo = db.veiculo.findByPk(id);
+      const veiculo = await db.veiculo.findByPk(id);
 
       if (!veiculo) {
         throw `Veículo não cadastrado para o código ${id}.`;
@@ -226,45 +238,45 @@ const VeiculoController = {
     } finally {
       response.send(content);
     }
-  },
-
-  /**
-   * @param {requestDataCreation} params 
-   * @returns {responseErrorCreation}
-   */
-  validate(params) {
-    const response = {
-      success: true,
-      error: ''
-    };
-
-    try {
-      if (!params.placa) {
-        throw 'Informação de placa é obrigatória.';
-      }
-
-      if (!params.renavam) {
-        throw 'Informação de Renavam é obrigatória.'
-      }
-
-      if (params.renavam.length < 11) {
-        throw 'Renavam inserido com formato inválido.';
-      }
-
-      if (!params.cor_id) {
-        throw 'Veículo precisa ter alguma cor relacionada.';
-      }
-      
-      if (!params.modelo_id) {
-        throw 'Veículo precisa ter algum modelo relacionado.';
-      }
-    } catch (error) {
-      response.success = false;
-      response.error = error;
-    } finally {
-      return response;
-    }
   }
 };
 
 export default VeiculoController;
+
+/**
+ * @param {requestDataCreation} params 
+ * @returns {responseErrorCreation}
+ */
+function validate(params) {
+  const response = {
+    success: true,
+    error: ''
+  };
+
+  try {
+    if (!params.placa) {
+      throw 'Informação de placa é obrigatória.';
+    }
+
+    if (!params.renavam) {
+      throw 'Informação de Renavam é obrigatória.'
+    }
+
+    if (params.renavam.length < 11) {
+      throw 'Renavam inserido com formato inválido.';
+    }
+
+    if (!params.cor_id) {
+      throw 'Veículo precisa ter alguma cor relacionada.';
+    }
+    
+    if (!params.modelo_id) {
+      throw 'Veículo precisa ter algum modelo relacionado.';
+    }
+  } catch (error) {
+    response.success = false;
+    response.error = error;
+  } finally {
+    return response;
+  }
+}

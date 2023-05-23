@@ -8,7 +8,7 @@ import { route } from './utils/route.js';
 const routes = Router();
 
 routes
-  .use(route('/'), VeiculoRoutes)
+  .use(route('/api'), VeiculoRoutes)
   .use(route('/cores'), CorRoutes)
   .use(route('/marcas'), MarcaRoutes)
   .use(route('/modelos'), ModeloRoutes);
